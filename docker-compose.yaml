@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+
+  ## === Caddy + Coraza WAF ===
+  caddy:
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./ruleset:/ruleset
+      - audit:/audit
+    ports:
+      - 8888:80  # WAF üzerinden DVWA’ya erişim
+    depends_on:
+      - dvwa
+
+  ## === DVWA (Hedef Uygulama) ===
+  dvwa:
+    image: vulnerables/web-dvwa
+    restart: always
+    environment:
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_HOST=db
+    depends_on:
+      - db
+
+  ## === MySQL (DVWA için veritabanı) ===
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+      - MYSQL_DATABASE=dvwa
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  ## === ZincSearch ===
+  zincsearch:
+    container_name: zincsearch
+    image: public.ecr.aws/zinclabs/zincsearch:latest
+    restart: always
+    ports:
+      - "4080:4080"
+    volumes:
+      - zinc-data:/data
+    environment:
+      - ZINC_FIRST_ADMIN_USER=admin
+      - ZINC_FIRST_ADMIN_PASSWORD=admin
+      - ZINC_DATA_PATH=/data
+
+
+
+  ## === Logger (Coraza loglarını ZincSearch'e yollar) ===
+  logger:
+    build: ./logger
+    volumes:
+      - ./caddy/audit:/audit
+    depends_on:
+      - zincsearch
+    environment:
+      - ZINC_URL=http://zincsearch:4080
+      - AUDIT_FILE=/audit
+
+
+
+volumes:
+  audit:
+  mysql-data: 
+  zinc-data:

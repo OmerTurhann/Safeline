@@ -1,0 +1,19 @@
+{
+    order coraza_waf first
+    auto_https off
+    admin off
+}
+
+:80 {
+    coraza_waf {
+        load_owasp_crs
+        directives `
+           Include /ruleset/coraza.conf
+           Include /ruleset/dvwa.conf
+           Include @owasp_crs/*.conf
+           SecRuleEngine On
+        `
+    }
+
+    reverse_proxy dvwa:80
+}

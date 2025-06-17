@@ -1,0 +1,33 @@
+{
+  "name": "coraza-logs",
+  "storage_type": "disk",
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "type": "standard"
+        }
+      }
+    }
+  },
+  "index": {
+    "fields": {
+      "timestamp":        { "type": "date" },
+      "level":            { "type": "keyword" },
+      "logger":           { "type": "keyword" },
+      "msg":              { "type": "text" },
+      "client_ip":        { "type": "ip" },
+      "phase":            { "type": "integer" },
+      "score":            { "type": "integer" },
+      "rule_file":        { "type": "text" },
+      "rule_line":        { "type": "integer" },
+      "rule_id":          { "type": "keyword" },
+      "rule_msg":         { "type": "text" },
+      "severity":         { "type": "keyword" },
+      "crs_version":      { "type": "keyword" },
+      "tags":             { "type": "keyword" },
+      "uri":              { "type": "text" },
+      "unique_id":        { "type": "keyword" }
+    }
+  }
+}
